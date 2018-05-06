@@ -1,0 +1,13 @@
+<?php
+	//error_reporting(0);
+	
+	$dbhost = "localhost";
+	$dbuser = "rnadaone";
+	$dbpass = "Sopomore1998";
+	$mydbase = "rnadaone_rnaMoZ";
+	
+	$conn = mysqli_connect($dbhost,$dbuser,$dbpass,$mydbase);
+	if(!$conn){
+		echo "ERROR: ".mysqli_connect_error().".";
+	}
+?>

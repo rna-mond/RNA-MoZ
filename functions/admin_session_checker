@@ -1,0 +1,22 @@
+<?php
+	session_start();
+	
+	$mloc = substr($_SERVER["SCRIPT_NAME"],1,strrpos($_SERVER["SCRIPT_NAME"],"/"));
+	if($mloc=="RNA - MoZ/admin/"){$loc = '../';}elseif($mloc=="RNA - MoZ/admin/dashboard/"){$loc = '../../';}else{$loc='';}
+	
+	$cloc = substr($_SERVER["SCRIPT_NAME"],1,strrpos($_SERVER["SCRIPT_NAME"],"/"))."</br>";
+	$cpage = substr($_SERVER["SCRIPT_NAME"],strrpos($_SERVER["SCRIPT_NAME"],"/")+1);
+	
+	if(isset($_SESSION['uid'])){$luserid = $_SESSION['uid'];}else{$luserid="";}
+	require_once($loc."functions/rna_con");
+	if((isset($_SESSION['uid'])&& $luserid!="")&&(isset($_SESSION['atype'])&&$_SESSION['atype']=="ADMIN")){
+		$sel_user = "SELECT firstname FROM user_details WHERE userid='$luserid'";
+		$run_sel = mysqli_query($conn,$sel_user);
+		
+		$sel_data = mysqli_fetch_array($run_sel);
+			$lfname = $sel_data['firstname'];
+	}
+	if((isset($_SESSION['uid']) && isset($_SESSION['atype'])&&$_SESSION['atype']=="USER" && ($cloc="RNA - MoZ/admin/" || $cloc="RNA - MoZ/admin/dashboard/"))||(!isset($_SESSION['uid']))){
+		header("Location: $loc");
+	}
+?>

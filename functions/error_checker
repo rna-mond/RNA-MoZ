@@ -1,0 +1,28 @@
+<?php
+	if(isset($_COOKIE['error'])){
+		if(isset($_COOKIE['fname'])){$efirstname = $_COOKIE['fname'];}else{$efirstname = "";}
+		if(isset($_COOKIE['mname'])){$emiddlename = $_COOKIE['mname'];}else{$emiddlename = "";}
+		if(isset($_COOKIE['lname'])){$elastname = $_COOKIE['lname'];}else{$elastname = "";}
+		if(isset($_COOKIE['uname'])){$eusername = $_COOKIE['uname'];}else{$eusername = "";}
+		if(isset($_COOKIE['mpword'])){$epassword = $_COOKIE['mpword'];}else{$epassword = "";}
+		if(isset($_COOKIE['cpword'])){$econ = $_COOKIE['cpword'];}else{$econ = "";}
+		if(isset($_COOKIE['email'])){$eemail = $_COOKIE['email'];}else{$eemail = "";}
+		if(isset($_COOKIE['mob'])){$emobile = $_COOKIE['mob'];}else{$emobile = "";}
+		if(isset($_COOKIE['add'])){$eaddress = $_COOKIE['add'];}else{$eaddress = "";}
+	}else{
+		$efirstname = "";
+		$emiddlename = "";
+		$elastname = "";
+		$eusername = "";
+		$epassword = "";
+		$econ = "";
+		$eemail = "";
+		$emobile = "";
+		$eaddress = "";
+	}
+	if(isset($_COOKIE['log'])){
+		if(isset($_COOKIE['user'])){$euname=$_COOKIE['user'];}else{$euname="";}
+	}else{
+		$euname = "";
+	}
+?>

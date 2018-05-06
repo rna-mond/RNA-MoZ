@@ -1,0 +1,91 @@
+<?php
+	session_start();
+	
+	$mloc = substr($_SERVER["SCRIPT_NAME"],1,strrpos($_SERVER["SCRIPT_NAME"],"/"));
+	if($mloc=="RNA - MoZ/login/"||$mloc=="RNA - MoZ/register/"||$mloc=="RNA - MoZ/admin/"){$loc = '../';}else{$loc='';}
+	
+	$cloc = substr($_SERVER["SCRIPT_NAME"],1,strrpos($_SERVER["SCRIPT_NAME"],"/"))."</br>";
+	$cpage = substr($_SERVER["SCRIPT_NAME"],strrpos($_SERVER["SCRIPT_NAME"],"/")+1);
+	if(isset($_SESSION['uid'])){$luserid = $_SESSION['uid'];}else{$luserid="";}
+	require_once($loc."functions/rna_con");
+	if((isset($_SESSION['uid'])&& $luserid!="")&&(isset($_SESSION['atype'])&&$_SESSION['atype']=="USER")){
+		$sel_user = "SELECT firstname FROM user_details WHERE userid='$luserid'";
+		$run_sel = mysqli_query($conn,$sel_user);
+		
+		$sel_data = mysqli_fetch_array($run_sel);
+			$lfname = $sel_data['firstname'];
+	}
+	if(isset($_SESSION['uid'])&&($mloc=='RNA - MoZ/register/'||$mloc='RNA - MoZ/login/') && (isset($_SESSION['atype']) && $_SESSION['atype']=="USER")){
+		header("Location: ".$loc);
+	}
+	if((isset($_SESSION['uid'])&&isset($_SESSION['atype']) && $_SESSION['atype']=="ADMIN")&&($mloc=='RNA - MoZ/register/'||$mloc='RNA - MoZ/login/'||$mloc='RNA - MoZ/')){
+		header("Location: ".$loc."admin/");
+	}
+	date_default_timezone_set('Asia/Manila');
+	if(isset($_GET['add'])&&!empty($_GET['add'])){
+		$add_code = $_GET['add'];
+		$sel_cart = mysqli_query($conn,"SELECT * FROM temp_cart WHERE product_code='$add_code'");
+		$check_add = mysqli_num_rows($sel_cart);
+		$Sel_Add = mysqli_query($conn,"SELECT * FROM products WHERE product_code='$add_code'");
+		$Add_Prod = mysqli_fetch_array($Sel_Add);
+		  $apcode = $Add_Prod['product_code'];
+		  $apprice = $Add_Prod['product_price'];
+		  $prodquant = $Add_Prod['product_quantity'];
+		  $apdate = date("M d, Y");
+		  
+			$cart_data = mysqli_fetch_array($sel_cart);
+			$apquantity = $cart_data['product_quantity'] + 1;
+			$new_apprice = $cart_data['product_price'] + $apprice;
+			
+			if($apquantity<=$prodquant){
+				if($check_add==0){
+					if(mysqli_query($conn,"INSERT INTO temp_cart(product_code,product_quantity,product_price,date_added) VALUES('$apcode',1,$apprice,'$apdate')")){
+						header("Location: ".$cpage);
+					}
+				}else{
+					if(mysqli_query($conn,"UPDATE temp_cart SET product_quantity=$apquantity,product_price=$new_apprice WHERE product_code='$add_code'")){
+						header("Location: ".$cpage);
+					}
+				}
+			}else{
+				$apquantity = $apquantity - 1;
+				setcookie("error_add","You have reach the maximum Product Quantity of $apcode: $apquantity/$prodquant",time()+30,"/");
+				header("Location: ".$cpage);
+			}
+	}
+	$loadcart = "SELECT * FROM temp_cart";
+	$run_load = mysqli_query($conn, $loadcart);
+	global $cart_pprice,$cart_count;
+	while($mycart_data=mysqli_fetch_array($run_load)){
+		$cart_pprice += $mycart_data['product_price'];
+		$cart_count += $mycart_data['product_quantity'];
+		$prod_addded = $mycart_data['date_added'];
+		if((substr($prod_addded,0,12))!=date("M d, Y")){
+			if(mysqli_query($conn,"TRUNCATE temp_cart")){
+				header("Location: ".$cpage);
+			}
+		}
+	}
+	if($cpage=='checkout.php'&&!isset($_SESSION['uid'])){
+		header("Location: login/");
+	}
+	if(isset($_COOKIE['error_add'])&&!empty($_COOKIE['error_add'])){?>
+		<div style="background: rgba(0,0,0,0.8);position: fixed; top: 0; right: 0; left: 0; bottom: 0; z-index: 10000;">
+			<center><div style="width: 50%;background: white;position: absolute; padding: 5% 5%; padding-bottom: 2%; margin: 8% 24%;border-bottom: 8px solid green;">
+				<h1 style="background: green;color: white; margin: -12.4% -12.4%; margin-bottom: 5%; text-align: left; padding: 2px 5%;"><span class="fa fa-info-circle"></span> MESSAGE <a href="?reset" style="color: white;float: right;"><span class="fa fa-close"></span></a></h1>
+				<h2><?php echo $_COOKIE['error_add'];?></h2><hr>
+				<a href="?reset"><button class="btn-yes">OK</button></a>
+			</div></center>
+		</div>
+	<?php }
+	if(isset($_GET['reset'])){
+		setcookie("error_add","",time()-30,"/");
+		header("Location: ".$cpage);
+	}
+	if($cpage=="single-product.php" && !isset($_GET['sel'])){
+		header("Location: shop.php");
+	}
+	if($cpage=="checkout.php" && $cart_count==0){
+		header("Location: shop.php");
+	}
+?>
